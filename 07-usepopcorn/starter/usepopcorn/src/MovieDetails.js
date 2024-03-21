@@ -1,6 +1,7 @@
 import StarRating from "./StarRating";
 import { Loader } from "./Loader";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useKey } from "./useKey";
 
 const KEY = "e12a6b6b";
 
@@ -13,6 +14,14 @@ export const MovieDetails = ({
   const [movie, setMovie] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [userRating, setUserRating] = useState("");
+
+  const countRef = useRef(0);
+
+  useEffect(() => {
+    if (userRating) {
+      countRef.current = countRef.current + 1;
+    }
+  }, [userRating]);
 
   const {
     Title: title,
@@ -54,23 +63,14 @@ export const MovieDetails = ({
       imdbRating: Number(imdbRating),
       userRating,
       runtime: runtime.split(" ").at(0),
+      countRatingDecisions: countRef.current,
     };
 
     onAddWatched(newWatchedMovie);
     onCloseMovie();
   }
 
-  useEffect(() => {
-    const callback = (e) => {
-      if (e.code === "Escape") {
-        onCloseMovie();
-      }
-    };
-
-    document.addEventListener("keydown", callback);
-
-    return () => document.removeEventListener("keydown", callback);
-  }, [onCloseMovie]);
+  useKey("Escape", onCloseMovie);
 
   useEffect(() => {
     if (!title) return;
